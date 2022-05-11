@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react'
 import { Link } from 'react-router-dom'
-import { collection, getDocs ,getDoc, deleteDoc } from 'firebase/firestore'
+import { collection, getDocs , deleteDoc, doc} from 'firebase/firestore'
 import {db} from '../firebaseConfig/firebase'
 
 import Swal from 'sweetalert2'
@@ -26,18 +26,38 @@ const Show = () => {
     setProductos(
       data.docs.map( (doc) =>( {...doc.data(), id:doc.id}))
     )
-    console.log(productos);
+    
   }
 
   // funcion para eliminar doc
 
   const eleminarProducto = async (id) => {
-    const productDoc = doc(db, "prodcuts" , id)
+    const productDoc = doc(db, "products", id)
     await deleteDoc(productDoc)
     getProductos()
   }
 
   // funcion de confirmacion para sweet alert
+  const confirmDelete = (id) => {
+    MySwal.fire({
+      title: 'Estas seguro?',
+      text: "No se podra recuperar!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Si, Eliminar!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        eleminarProducto(id)
+        Swal.fire(
+          'Eliminado!',
+          'Se ha eliminado .',
+          'success'
+        )
+      }
+    })
+  }
 
   //useeffect
 
@@ -74,7 +94,7 @@ const Show = () => {
                     <td>{product.stock}</td>
                     <td>
                       <Link to={`/edit/${product.id}`} className="btn btn-light"><i className="fa-solid fa-pencil"></i></Link>
-                      <button onClick={ () => {eleminarProducto(product.id)} } className=" btn btn-danger"><i className="fa-solid fa-trash-can"></i></button>
+                      <button onClick={ () => {confirmDelete(product.id) } } className=" btn btn-danger"><i className="fa-solid fa-trash-can"></i></button>
                     </td>
                   </tr>
                 )
